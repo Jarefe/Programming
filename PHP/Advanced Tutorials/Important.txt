@@ -1,0 +1,5 @@
+To access php files via localhost
+
+php -S localhost:8000 -t "Advanced Tutorials"
+
+http://localhost:8000/[filename].php
