@@ -134,10 +134,15 @@ for sheet_name in wb.sheetnames:
             
     # apply conditional formatting
     match sheet_name:
-        case "Dash Inventory":
-            scrap.formula = ['$A2="SCRP"']
-            sheet.conditional_formatting.add(f"A2:A{max_row}", scrap)
+        case 'Dash Inventory': # manually looping because conditional formatting gets overwritten
+            for row in sheet.iter_rows(min_row=2, max_row=max_row, min_col=1, max_col=1):
+                for cell in row:
+                    if cell.value == "SCRP":  
+                        cell.fill = PatternFill(start_color='FFC7CE', end_color='FFC7CE', fill_type='solid')
+
         case "Desktops":
+            scrap.formula = ['$C2="SCRP"']
+            sheet.conditional_formatting.add(f"C2:C{max_row}", scrap)
             for mem_type, color in memory_rules.items():
                 rule = Rule(
                     type='expression',
@@ -145,7 +150,10 @@ for sheet_name in wb.sheetnames:
                     dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
                 )
                 sheet.conditional_formatting.add(f"K2:K{max_row}", rule)
+
         case "Laptops":
+            scrap.formula = ['$C2="SCRP"']
+            sheet.conditional_formatting.add(f"C2:C{max_row}", scrap)
             for mem_type, color in memory_rules.items():
                 rule = Rule(
                     type='expression',
@@ -153,10 +161,14 @@ for sheet_name in wb.sheetnames:
                     dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
                 )
                 sheet.conditional_formatting.add(f"K2:K{max_row}", rule)
-            print()
+
         case "Networking":
-            print()
+            scrap.formula = ['$C2="SCRP"']
+            sheet.conditional_formatting.add(f"C2:C{max_row}", scrap)
+
         case "Servers":
+            scrap.formula = ['$C2="SCRP"']
+            sheet.conditional_formatting.add(f"C2:C{max_row}", scrap)
             for mem_type, color in memory_rules.items():
                 rule = Rule(
                     type='expression',
@@ -164,12 +176,8 @@ for sheet_name in wb.sheetnames:
                     dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
                 )
                 sheet.conditional_formatting.add(f"N2:N{max_row}", rule)
-            print()
+
     # add table to sheet
     sheet.add_table(table)
-
-
-
-
 
 wb.save(excel_path)
