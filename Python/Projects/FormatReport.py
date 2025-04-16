@@ -2,6 +2,8 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Color, PatternFill, Font, Border
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import ColorScaleRule, CellIsRule, FormulaRule
+from openpyxl.worksheet.table import Table, TableStyleInfo
+from openpyxl.utils import get_column_letter
 import os, sys
 
 def is_sheet_empty(sheet):
@@ -11,7 +13,7 @@ def is_sheet_empty(sheet):
                 return False # if sheet has data beyond header
     return True # only header exists
 
-
+# output file will be in same folder as script
 script_dir = os.path.dirname(os.path.abspath(__file__))
 excel_path = os.path.join(script_dir, "Test Output.xlsx")
 
@@ -44,3 +46,23 @@ for sheet_name in original_wb.sheetnames:
             new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
 
 
+for sheet_name in wb.sheetnames:
+    sheet = wb[sheet_name]
+
+    max_row = sheet.max_row
+    max_column = sheet.max_column
+
+
+    # define range of cells including header
+    table_range = f'A1:{get_column_letter(max_column)}{max_row}'
+    
+    # create table with data range
+    table = Table(displayName=f"Table_{sheet_name.replace(' ','')}", ref=table_range)
+
+    # add table to sheet
+    sheet.add_table(table)
+
+# TODO apply conditional formatting
+
+
+wb.save(excel_path)
