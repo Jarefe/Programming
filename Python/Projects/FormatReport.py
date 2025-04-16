@@ -1,5 +1,5 @@
 from openpyxl import Workbook, load_workbook
-from openpyxl.styles import Color, PatternFill, Font, Border, Side
+from openpyxl.styles import Color, PatternFill, Font, Border, Side, Alignment
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import ColorScaleRule, CellIsRule, FormulaRule
 from openpyxl.worksheet.table import Table, TableStyleInfo
@@ -58,6 +58,11 @@ border = Border(
     top=Side(style="thin"), 
     bottom=Side(style="thin"))
 
+alignment = Alignment(
+    horizontal='left',
+    vertical='center'
+)
+
 
 for sheet_name in wb.sheetnames:
     sheet = wb[sheet_name]
@@ -90,6 +95,8 @@ for sheet_name in wb.sheetnames:
     for row in sheet.iter_rows(min_row=1, max_row=max_row, min_col=1, max_col=max_column):
         for cell in row:
             cell.border = border
+            cell.alignment = alignment
+            
 
     # add table to sheet
     sheet.add_table(table)
