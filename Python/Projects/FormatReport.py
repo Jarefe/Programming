@@ -96,6 +96,26 @@ for sheet_name in wb.sheetnames:
         for cell in row:
             cell.border = border
             cell.alignment = alignment
+
+    # "autofit" columns
+    for col in sheet.columns:
+        max_length = 0
+        column = col[0].column
+        column_letter = get_column_letter(column)
+
+        # get longest cell width in column
+        for cell in col:
+            try:
+                if cell.value:
+                    cell_length = len(str(cell.value))
+                    if cell_length > max_length:
+                        max_length = cell_length
+            except:
+                pass
+
+        # fit column widths based on max length
+        adjusted_width = max_length + 1
+        sheet.column_dimensions[column_letter].width = adjusted_width
             
 
     # add table to sheet
