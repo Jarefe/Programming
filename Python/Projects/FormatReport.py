@@ -177,6 +177,8 @@ for sheet_name in wb.sheetnames:
                 )
                 sheet.conditional_formatting.add(f"N2:N{max_row}", rule)
 
+    # TODO add manual looping to format empty cells in middle of each table
+    
     # add table to sheet
     sheet.add_table(table)
 
