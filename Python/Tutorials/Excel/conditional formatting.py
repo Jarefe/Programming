@@ -1,7 +1,6 @@
 from openpyxl.formatting import Rule
 from openpyxl.styles import Font, PatternFill, Border
 from openpyxl.styles.differential import DifferentialStyle
-
 import os
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -79,3 +78,14 @@ wb.save(excel_path)
 
 
 # formatting entire rows
+ws.append(['Software', 'Developer', 'Version'])
+ws.append(['Excel', 'Microsoft', '2016'])
+ws.append(['openpyxl', 'Open source', '2.6'])
+ws.append(['OpenOffice', 'Apache', '4.1.4'])
+ws.append(['Word', 'Microsoft', '2010'])
+
+red_fill = PatternFill(bgColor="FFC7CE")
+dxf = DifferentialStyle(fill=red_fill)
+r = Rule(type="expression", dxf=dxf, stopIfTrue=True)
+r.formula = ['$A2="Microsoft"']
+ws.conditional_formatting.add("A1:C10", r)
