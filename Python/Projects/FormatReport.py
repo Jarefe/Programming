@@ -1,7 +1,7 @@
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Color, PatternFill, Font, Border, Side, Alignment
 from openpyxl.styles.differential import DifferentialStyle
-from openpyxl.formatting.rule import ColorScaleRule, CellIsRule, FormulaRule
+from openpyxl.formatting.rule import ColorScaleRule, CellIsRule, FormulaRule, Rule
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils import get_column_letter
 import os, sys
@@ -35,6 +35,7 @@ wb.remove(wb.active)
 for sheet_name in original_wb.sheetnames:
     original_sheet = original_wb[sheet_name]
 
+    # skip empty sheets
     if is_sheet_empty(original_sheet):
         print(f'{sheet_name} is empty; skipping')
         continue
@@ -62,6 +63,20 @@ alignment = Alignment(
     horizontal='left',
     vertical='center'
 )
+
+# formatting rules
+
+# scrap
+red_fill = PatternFill(bgColor='FFC7CE')
+dxf = DifferentialStyle(fill=red_fill)
+scrap = Rule(type="expression", dxf=dxf)
+
+# ram
+memory_rules = {
+    "DDR3": "D9E1F2",  # light blue
+    "DDR4": "C6EFCE",  # light green
+    "DDR5": "06402B",  # dark green
+}
 
 
 for sheet_name in wb.sheetnames:
@@ -117,11 +132,43 @@ for sheet_name in wb.sheetnames:
         adjusted_width = max_length + 1
         sheet.column_dimensions[column_letter].width = adjusted_width
             
-
+    # apply conditional formatting
+    match sheet_name:
+        case "Dash Inventory":
+            scrap.formula = ['$A2="SCRP"']
+            sheet.conditional_formatting.add(f"A2:A{max_row}", scrap)
+        case "Desktops":
+            for mem_type, color in memory_rules.items():
+                rule = Rule(
+                    type='expression',
+                    formula=[f'$K2="{mem_type}"'],
+                    dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
+                )
+                sheet.conditional_formatting.add(f"K2:K{max_row}", rule)
+        case "Laptops":
+            for mem_type, color in memory_rules.items():
+                rule = Rule(
+                    type='expression',
+                    formula=[f'$K2="{mem_type}"'],
+                    dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
+                )
+                sheet.conditional_formatting.add(f"K2:K{max_row}", rule)
+            print()
+        case "Networking":
+            print()
+        case "Servers":
+            for mem_type, color in memory_rules.items():
+                rule = Rule(
+                    type='expression',
+                    formula=[f'$N2="{mem_type}"'],
+                    dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
+                )
+                sheet.conditional_formatting.add(f"N2:N{max_row}", rule)
+            print()
     # add table to sheet
     sheet.add_table(table)
 
-# TODO apply conditional formatting
+
 
 
 
