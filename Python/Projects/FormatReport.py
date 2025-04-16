@@ -1,5 +1,5 @@
 from openpyxl import Workbook, load_workbook
-from openpyxl.styles import Color, PatternFill, Font, Border
+from openpyxl.styles import Color, PatternFill, Font, Border, Side
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import ColorScaleRule, CellIsRule, FormulaRule
 from openpyxl.worksheet.table import Table, TableStyleInfo
@@ -45,6 +45,19 @@ for sheet_name in original_wb.sheetnames:
         for cell in row:
             new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
 
+# create tables in each remaining sheet
+# and apply styles
+orange_fill = PatternFill(
+    start_color='FFA500', 
+    end_color='FFA500', 
+    fill_type='solid')
+
+border = Border(
+    left=Side(style="thin"), 
+    right=Side(style="thin"), 
+    top=Side(style="thin"), 
+    bottom=Side(style="thin"))
+
 
 for sheet_name in wb.sheetnames:
     sheet = wb[sheet_name]
@@ -58,11 +71,31 @@ for sheet_name in wb.sheetnames:
     
     # create table with data range
     table = Table(displayName=f"Table_{sheet_name.replace(' ','')}", ref=table_range)
+    
+    # style = TableStyleInfo(
+    #     name="TableStyleMedium2",
+    #     showFirstColumn=False,
+    #     showLastColumn=False,
+    #     showRowStripes=False,
+    #     showColumnStripes=False
+    #     )
+    # table.tableStyleInfo = style
+
+    # apply orange fill to header row
+    for col in range(1, max_column + 1):
+        cell = sheet.cell(row=1, column=col)
+        cell.fill = orange_fill
+
+    # apply borders to each cell
+    for row in sheet.iter_rows(min_row=1, max_row=max_row, min_col=1, max_col=max_column):
+        for cell in row:
+            cell.border = border
 
     # add table to sheet
     sheet.add_table(table)
 
 # TODO apply conditional formatting
+
 
 
 wb.save(excel_path)
