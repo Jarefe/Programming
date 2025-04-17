@@ -9,7 +9,9 @@ import os, sys
 # FORMATTING RULES
 # scrap
 RED_FILL = PatternFill(bgColor='FFC7CE')
-SCRAP = Rule(type="expression", dxf=DifferentialStyle(fill=RED_FILL))
+
+# notes
+YELLOW_FILL = PatternFill(bgColor='FFFF00')
 
 # ram
 RAM_RULE = {
@@ -149,8 +151,74 @@ def autofit(sheet):
         adjusted_width = max_length + 1
         sheet.column_dimensions[column_letter].width = adjusted_width
 
-def format_column(sheet):
-    print()
+def apply_conditional_formatting(sheet, sheet_name):
+    max_row = sheet.max_row
+    
+    match sheet_name:
+        case 'Dash Inventory':
+            SCRAP = Rule(
+                type='expression',
+                formula=['$A2="SCRP"'],
+                dxf=DifferentialStyle(fill=RED_FILL) 
+            )
+            sheet.conditional_formatting.add(f"A2:A{max_row}", SCRAP)
+
+        case "Desktops":
+            SCRAP = Rule(
+                type='expression',
+                formula=['$C2="SCRP"'],
+                dxf=DifferentialStyle(fill=RED_FILL)
+            )
+            sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
+
+            for mem_type, color in RAM_RULE.items():
+                rule = Rule(
+                    type='expression',
+                    formula=[f'$K2="{mem_type}"'],
+                    dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
+                )
+                sheet.conditional_formatting.add(f"K2:K{max_row}", rule)
+
+        case "Laptops":
+            SCRAP = Rule(
+                type='expression',
+                formula=['$C2="SCRP"'],
+                dxf=DifferentialStyle(fill=RED_FILL) 
+            )
+            sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
+
+            for mem_type, color in RAM_RULE.items():
+                rule = Rule(
+                    type='expression',
+                    formula=[f'$K2="{mem_type}"'],
+                    dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
+                )
+                sheet.conditional_formatting.add(f"K2:K{max_row}", rule)
+
+        case "Networking":
+            SCRAP = Rule(
+                type='expression',
+                formula=['$C2="SCRP"'],
+                dxf=DifferentialStyle(fill=RED_FILL)
+            )
+            sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
+
+        case "Servers":
+            SCRAP = Rule(
+                type='expression',
+                formula=['$C2="SCRP"'],
+                dxf=DifferentialStyle(fill=RED_FILL) 
+            )
+            sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
+
+            for mem_type, color in RAM_RULE.items():
+                rule = Rule(
+                    type='expression',
+                    formula=[f'$N2="{mem_type}"'],
+                    dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
+                )
+                sheet.conditional_formatting.add(f"N2:N{max_row}", rule)
+
 
 # TODO handle file inputs and outputs
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -191,49 +259,7 @@ for sheet_name in wb.sheetnames:
     autofit(current_sheet)
          
     # apply conditional formatting
-    match sheet_name:
-        case 'Dash Inventory': # manually looping because conditional formatting gets overwritten
-            for row in current_sheet.iter_rows(min_row=2, max_row=max_row, min_col=1, max_col=1):
-                for cell in row:
-                    if cell.value == "SCRP":  
-                        cell.fill = PatternFill(start_color='FFC7CE', end_color='FFC7CE', fill_type='solid')
-
-        case "Desktops":
-            SCRAP.formula = ['$C2="SCRP"']
-            current_sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
-            for mem_type, color in RAM_RULE.items():
-                rule = Rule(
-                    type='expression',
-                    formula=[f'$K2="{mem_type}"'],
-                    dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
-                )
-                current_sheet.conditional_formatting.add(f"K2:K{max_row}", rule)
-
-        case "Laptops":
-            SCRAP.formula = ['$C2="SCRP"']
-            current_sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
-            for mem_type, color in RAM_RULE.items():
-                rule = Rule(
-                    type='expression',
-                    formula=[f'$K2="{mem_type}"'],
-                    dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
-                )
-                current_sheet.conditional_formatting.add(f"K2:K{max_row}", rule)
-
-        case "Networking":
-            SCRAP.formula = ['$C2="SCRP"']
-            current_sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
-
-        case "Servers":
-            SCRAP.formula = ['$C2="SCRP"']
-            current_sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
-            for mem_type, color in RAM_RULE.items():
-                rule = Rule(
-                    type='expression',
-                    formula=[f'$N2="{mem_type}"'],
-                    dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
-                )
-                current_sheet.conditional_formatting.add(f"N2:N{max_row}", rule)
+    apply_conditional_formatting(current_sheet, sheet_name)
 
     # TODO add manual looping to format empty cells in middle of each table
 
