@@ -7,7 +7,6 @@ from openpyxl.utils import get_column_letter
 import os, sys
 
 # NOTE: This program does not currently handle AIOs
-# TODO: handle file input and outputs
 # TODO: handle description cleaning and copying to notes
 # TODO: try to optimize functions that require looping through every value
 
@@ -23,7 +22,7 @@ GRAY_FILL = PatternFill(bgColor='D3D3D3')
 
 # ram
 RAM_RULE = {
-    'DDR3': '0000FF',  # light blue
+    'DDR3': 'ADD8E6',  # light blue
     'DDR4': 'C6EFCE',  # light green
     'DDR5': '06402B',  # dark green
 }
@@ -48,40 +47,6 @@ ALIGNMENT = Alignment(
     horizontal='left',
     vertical='center'
     )
-
-# these columns will be gray if the cells are empty
-GRAY_CATEGORIES = [
-    'Processor',
-    'Type of RAM',
-    'RAM Capacity',
-    'Battery',
-    'Touchscreen',
-    'GPU',
-    'Drive Caddy',
-    'Drive Capacity',
-    'Drive Interface',
-    'Wi-Fi',
-    'Form Factor',
-    'Rack Ears',
-    '# of PSUs',
-    'PSU Part#',
-    '# of Stack Ports',
-    'Stacking Port',
-    'Module',
-    '# of Bays',
-    'HDD Form Factor',
-    '# of Processors',
-    'Processor(s)',
-    'RAM Breakdown',
-    'RAM MFGR (Apple Only)',
-    'RAM OEM Part# (Apple Only)',
-    'Power Supply',
-    'RAID Card',
-    'Management Interface',
-    'Card Slot 1',
-    'Card Slot 2',
-    'Card Slot 3'
-]
 
 def clean_text(text):
     """Removes instances of ' - Dash Specs'"""
