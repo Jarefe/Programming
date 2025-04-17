@@ -89,7 +89,6 @@ def clean_text(text):
         return text.replace(" - Dash Specs", "").strip()
     return text
 
-# returns cleaned copy of passed in workbook 
 def copy_data(old_wb):
     """Copies data from original excel file and inserts into newly created file"""
 
@@ -150,8 +149,6 @@ def format_header(sheet):
         cell = sheet.cell(row=1, column=col)
         cell.fill = ORANGE_FILL
 
-# Can comment out for efficiency
-# has to loop through each cell to change style
 def format_borders(sheet):
     """Loops through each cell to apply borders"""
     for row in sheet.iter_rows(min_row=1, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
@@ -159,8 +156,6 @@ def format_borders(sheet):
             cell.border = BORDER
             cell.alignment = ALIGNMENT
 
-# can comment out for efficiency
-# has to loop through each cell to get longest string
 def autofit(sheet):
     """Loops through each cell to get longest string and apply column spacing accordingly"""
     for col in sheet.columns:
@@ -269,6 +264,7 @@ excel_path = os.path.join(script_dir, 'Test Output.xlsx')
 # load existing workbook
 # TODO change to be dynamic
 try:
+    
     original_path = 'C:/Users/test/Downloads/Report 3.xlsx' 
     original_wb = load_workbook(original_path)
 except Exception as e:
@@ -291,9 +287,13 @@ for sheet_name in wb.sheetnames:
     format_header(current_sheet)
 
     # apply borders to each cell
+    # NOTE: can comment out for efficiency
+    # has to loop through each cell to change style
     format_borders(current_sheet)
 
     # "autofit" columns
+    # NOTE: can comment out for efficiency
+    # has to loop through each cell to get longest string
     autofit(current_sheet)
          
     # apply conditional formatting
