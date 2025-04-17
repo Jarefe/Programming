@@ -23,7 +23,7 @@ GRAY_FILL = PatternFill(bgColor='D3D3D3')
 
 # ram
 RAM_RULE = {
-    'DDR3': 'D9E1F2',  # light blue
+    'DDR3': '0000FF',  # light blue
     'DDR4': 'C6EFCE',  # light green
     'DDR5': '06402B',  # dark green
 }
@@ -257,19 +257,28 @@ def apply_conditional_formatting(sheet, sheet_name):
 
     check_no_attribute(sheet, check_empty_range)
 
-# TODO handle file inputs and outputs
-script_dir = os.path.dirname(os.path.abspath(__file__))
-excel_path = os.path.join(script_dir, 'Test Output.xlsx')
-
 # load existing workbook
-# TODO change to be dynamic
 try:
-    
-    original_path = 'C:/Users/test/Downloads/Report 3.xlsx' 
+    if len(sys.argv) > 1:
+        original_path = sys.argv[1]
+    else:
+        original_path = input('Input the absolute path of the original excel file (use /)')
+
     original_wb = load_workbook(original_path)
 except Exception as e:
-    print(f'{e}')
+    print(f'Failed to load file: {e}')
     sys.exit(1)
+
+# get filename and directory of original
+original_dir = os.path.dirname(original_path)
+original_filename = os.path.splitext(os.path.basename(original_path))[0]
+
+# create new filename to prevent overwrites
+output_filename = f"{original_filename}_Formatted.xlsx"
+excel_path = os.path.join(original_dir, output_filename)
+
+print(f"Successfully loaded: {original_path}")
+print(f"Output will be saved to: {excel_path}")
 
 # copy data to new workbook
 wb = copy_data(original_wb)
