@@ -73,9 +73,6 @@ GRAY_CATEGORIES = [
     "Card Slot 3"
 ]
 
-def load_workbook():
-    print()
-
 def copy_data(old_wb):
 
     # create new workbook
@@ -164,8 +161,8 @@ excel_path = os.path.join(script_dir, "Test Output.xlsx")
 try:
     original_path = 'C:/Users/test/Downloads/Report 1.xlsx' 
     original_wb = load_workbook(original_path)
-except:
-    print("Error loading file, stopping program")
+except Exception as e:
+    print(f"{e}")
     sys.exit(1)
 
 # copy data to new workbook
