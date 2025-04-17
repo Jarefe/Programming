@@ -6,7 +6,10 @@ from openpyxl.worksheet.table import Table
 from openpyxl.utils import get_column_letter
 import os, sys
 
-## NOTE: This program does not currently handle AIOs
+# NOTE: This program does not currently handle AIOs
+# TODO: handle file input and outputs
+# TODO: handle description cleaning and copying to notes
+# TODO: try to optimize functions that require looping through every value
 
 # FORMATTING RULES
 # scrap
@@ -81,12 +84,14 @@ GRAY_CATEGORIES = [
 ]
 
 def clean_text(text):
+    """Removes instances of ' - Dash Specs'"""
     if isinstance(text, str):
         return text.replace(" - Dash Specs", "").strip()
     return text
 
 # returns cleaned copy of passed in workbook 
 def copy_data(old_wb):
+    """Copies data from original excel file and inserts into newly created file"""
 
     # create new workbook
     wb = Workbook()
@@ -118,6 +123,7 @@ def copy_data(old_wb):
     return wb
 
 def is_sheet_empty(sheet): # TODO optimize this function
+    """Checks if there is information present other than the header line"""
     for row in sheet.iter_rows(min_row=2): # skip header
         for cell in row:
             if cell.value is not None:
@@ -125,6 +131,8 @@ def is_sheet_empty(sheet): # TODO optimize this function
     return True # only header exists
 
 def create_table(sheet):
+    """Creates a table using all the data in the given sheet"""
+
     # obtain farthest cell
     max_row = sheet.max_row
     max_column = sheet.max_column
@@ -137,17 +145,24 @@ def create_table(sheet):
     sheet.add_table(table)
 
 def format_header(sheet):
+    """Applies orange fill to header line"""
     for col in range(1, sheet.max_column + 1):
         cell = sheet.cell(row=1, column=col)
         cell.fill = ORANGE_FILL
 
+# Can comment out for efficiency
+# has to loop through each cell to change style
 def format_borders(sheet):
+    """Loops through each cell to apply borders"""
     for row in sheet.iter_rows(min_row=1, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
         for cell in row:
             cell.border = BORDER
             cell.alignment = ALIGNMENT
 
+# can comment out for efficiency
+# has to loop through each cell to get longest string
 def autofit(sheet):
+    """Loops through each cell to get longest string and apply column spacing accordingly"""
     for col in sheet.columns:
         max_length = 0
         column = col[0].column
@@ -164,10 +179,11 @@ def autofit(sheet):
                 pass
 
         # fit column widths based on max length
-        adjusted_width = max_length + 1
+        adjusted_width = max_length + 3
         sheet.column_dimensions[column_letter].width = adjusted_width
 
 def check_no_attribute(sheet, range):
+    """Checks if cell in given range is empty or states 'No Drive'"""
     EMPTY = Rule(
         type='expression',
         formula=['OR(ISBLANK(J2), LOWER(J2)="no drive")'],
@@ -176,6 +192,7 @@ def check_no_attribute(sheet, range):
     sheet.conditional_formatting.add(range, EMPTY)
 
 def apply_conditional_formatting(sheet, sheet_name):
+    """Applies conditional formatting to passed in sheet"""
     max_row = sheet.max_row
 
     # store headers in list to prevent repeated indexing
@@ -252,7 +269,7 @@ excel_path = os.path.join(script_dir, 'Test Output.xlsx')
 # load existing workbook
 # TODO change to be dynamic
 try:
-    original_path = 'C:/Users/test/Downloads/Report 1.xlsx' 
+    original_path = 'C:/Users/test/Downloads/Report 3.xlsx' 
     original_wb = load_workbook(original_path)
 except Exception as e:
     print(f'{e}')
