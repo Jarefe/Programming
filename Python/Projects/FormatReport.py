@@ -1,10 +1,12 @@
 from openpyxl import Workbook, load_workbook
-from openpyxl.styles import Color, PatternFill, Font, Border, Side, Alignment
+from openpyxl.styles import PatternFill, Border, Side, Alignment
 from openpyxl.styles.differential import DifferentialStyle
-from openpyxl.formatting.rule import ColorScaleRule, CellIsRule, FormulaRule, Rule
-from openpyxl.worksheet.table import Table, TableStyleInfo
+from openpyxl.formatting.rule import Rule
+from openpyxl.worksheet.table import Table
 from openpyxl.utils import get_column_letter
 import os, sys
+
+## NOTE: This program does not currently handle AIOs
 
 # FORMATTING RULES
 # scrap
@@ -14,7 +16,7 @@ RED_FILL = PatternFill(bgColor='FFC7CE')
 YELLOW_FILL = PatternFill(bgColor='FFFF00')
 
 # empty values
-GRAY_FILL = PatternFill(bgColor='808080')
+GRAY_FILL = PatternFill(bgColor='D3D3D3')
 
 # ram
 RAM_RULE = {
@@ -165,8 +167,21 @@ def autofit(sheet):
         adjusted_width = max_length + 1
         sheet.column_dimensions[column_letter].width = adjusted_width
 
+def check_no_attribute(sheet, range):
+    EMPTY = Rule(
+        type='expression',
+        formula=['OR(ISBLANK(J2), LOWER(J2)="no drive")'],
+        dxf=DifferentialStyle(fill=GRAY_FILL)
+    )
+    sheet.conditional_formatting.add(range, EMPTY)
+
 def apply_conditional_formatting(sheet, sheet_name):
     max_row = sheet.max_row
+
+    # store headers in list to prevent repeated indexing
+    headers = [sheet.cell(row=1, column=col).value for col in range(1, sheet.max_column + 1)]
+
+    # TODO implement header row that way no need to index everytime
 
     # create rule specific to dash inventory sheet
     if sheet_name == 'Dash Inventory':
@@ -203,11 +218,8 @@ def apply_conditional_formatting(sheet, sheet_name):
         notes_col_letter = None
 
     # look for notes column 
-    for col in range(1, sheet.max_column + 1):
-        cell_value = sheet.cell(row=1, column=col).value
-        if cell_value.strip().lower() == "notes":
-            notes_col_letter = get_column_letter(col)
-            break
+    notes_col_index = headers.index('Notes') + 1 # index of notes column
+    notes_col_letter = get_column_letter(notes_col_index)
         
     # highlight non blank cells in notes column
     if notes_col_letter:
@@ -219,6 +231,19 @@ def apply_conditional_formatting(sheet, sheet_name):
         sheet.conditional_formatting.add(
             f"{notes_col_letter}2:{notes_col_letter}{max_row}", notes_rule
         )
+
+    # apply empty cell formatting
+    match sheet_name:
+        case "Desktops":
+            check_empty_range = f'$J2:$R{max_row}'
+        case "Laptops":
+            check_empty_range = f'$J2:$R{max_row}'
+        case "Networking":
+            check_empty_range = f'$J2:$O{max_row}'
+        case "Servers":
+            check_empty_range = f'$J2:$X{max_row}'
+
+    check_no_attribute(sheet, check_empty_range)
 
 # TODO handle file inputs and outputs
 script_dir = os.path.dirname(os.path.abspath(__file__))
