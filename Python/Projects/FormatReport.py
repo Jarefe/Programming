@@ -6,20 +6,52 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils import get_column_letter
 import os, sys
 
-def is_sheet_empty(sheet):
+def is_sheet_empty(sheet): # TODO optimize this function
     for row in sheet.iter_rows(min_row=2): # skip header
         for cell in row:
             if cell.value is not None:
                 return False # if sheet has data beyond header
     return True # only header exists
 
-# output file will be in same folder as script
+# FORMATTING RULES
+# scrap
+RED_FILL = PatternFill(bgColor='FFC7CE')
+SCRAP = Rule(type="expression", dxf=DifferentialStyle(fill=RED_FILL))
+
+# ram
+RAM_RULE = {
+    "DDR3": "D9E1F2",  # light blue
+    "DDR4": "C6EFCE",  # light green
+    "DDR5": "06402B",  # dark green
+}
+
+# style for header
+ORANGE_FILL = PatternFill(
+    start_color='FFA500', 
+    end_color='FFA500', 
+    fill_type='solid')
+
+# thin line border
+BORDER = Border(
+    left=Side(style="thin"), 
+    right=Side(style="thin"), 
+    top=Side(style="thin"), 
+    bottom=Side(style="thin"))
+
+# left alignment and vertically centered
+ALIGNMENT = Alignment(
+    horizontal='left',
+    vertical='center'
+)
+
+# TODO handle file inputs and outputs
 script_dir = os.path.dirname(os.path.abspath(__file__))
 excel_path = os.path.join(script_dir, "Test Output.xlsx")
 
 # load existing workbook
+# TODO change to be dynamic
 try:
-    original_path = 'C:/Users/test/Downloads/Report 1.xlsx' # TODO change to be dynamic
+    original_path = 'C:/Users/test/Downloads/Report 1.xlsx' 
     original_wb = load_workbook(original_path)
 except:
     print("Error loading file, stopping program")
@@ -40,77 +72,40 @@ for sheet_name in original_wb.sheetnames:
         print(f'{sheet_name} is empty; skipping')
         continue
 
+    # create sheet in new workbook
     new_sheet = wb.create_sheet(title=sheet_name)
 
+    # copy data from old sheet to new sheet
     for row in original_sheet.iter_rows():
         for cell in row:
             new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
 
-# create tables in each remaining sheet
-# and apply styles
-orange_fill = PatternFill(
-    start_color='FFA500', 
-    end_color='FFA500', 
-    fill_type='solid')
-
-border = Border(
-    left=Side(style="thin"), 
-    right=Side(style="thin"), 
-    top=Side(style="thin"), 
-    bottom=Side(style="thin"))
-
-alignment = Alignment(
-    horizontal='left',
-    vertical='center'
-)
-
-# formatting rules
-
-# scrap
-red_fill = PatternFill(bgColor='FFC7CE')
-dxf = DifferentialStyle(fill=red_fill)
-scrap = Rule(type="expression", dxf=dxf)
-
-# ram
-memory_rules = {
-    "DDR3": "D9E1F2",  # light blue
-    "DDR4": "C6EFCE",  # light green
-    "DDR5": "06402B",  # dark green
-}
 
 
+# go through each sheet in the workbook
 for sheet_name in wb.sheetnames:
     sheet = wb[sheet_name]
 
+    # obtain farthest cell
     max_row = sheet.max_row
     max_column = sheet.max_column
-
 
     # define range of cells including header
     table_range = f'A1:{get_column_letter(max_column)}{max_row}'
     
     # create table with data range
     table = Table(displayName=f"Table_{sheet_name.replace(' ','')}", ref=table_range)
-    
-    # style = TableStyleInfo(
-    #     name="TableStyleMedium2",
-    #     showFirstColumn=False,
-    #     showLastColumn=False,
-    #     showRowStripes=False,
-    #     showColumnStripes=False
-    #     )
-    # table.tableStyleInfo = style
 
     # apply orange fill to header row
     for col in range(1, max_column + 1):
         cell = sheet.cell(row=1, column=col)
-        cell.fill = orange_fill
+        cell.fill = ORANGE_FILL
 
     # apply borders to each cell
     for row in sheet.iter_rows(min_row=1, max_row=max_row, min_col=1, max_col=max_column):
         for cell in row:
-            cell.border = border
-            cell.alignment = alignment
+            cell.border = BORDER
+            cell.alignment = ALIGNMENT
 
     # "autofit" columns
     for col in sheet.columns:
@@ -141,9 +136,9 @@ for sheet_name in wb.sheetnames:
                         cell.fill = PatternFill(start_color='FFC7CE', end_color='FFC7CE', fill_type='solid')
 
         case "Desktops":
-            scrap.formula = ['$C2="SCRP"']
-            sheet.conditional_formatting.add(f"C2:C{max_row}", scrap)
-            for mem_type, color in memory_rules.items():
+            SCRAP.formula = ['$C2="SCRP"']
+            sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
+            for mem_type, color in RAM_RULE.items():
                 rule = Rule(
                     type='expression',
                     formula=[f'$K2="{mem_type}"'],
@@ -152,9 +147,9 @@ for sheet_name in wb.sheetnames:
                 sheet.conditional_formatting.add(f"K2:K{max_row}", rule)
 
         case "Laptops":
-            scrap.formula = ['$C2="SCRP"']
-            sheet.conditional_formatting.add(f"C2:C{max_row}", scrap)
-            for mem_type, color in memory_rules.items():
+            SCRAP.formula = ['$C2="SCRP"']
+            sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
+            for mem_type, color in RAM_RULE.items():
                 rule = Rule(
                     type='expression',
                     formula=[f'$K2="{mem_type}"'],
@@ -163,13 +158,13 @@ for sheet_name in wb.sheetnames:
                 sheet.conditional_formatting.add(f"K2:K{max_row}", rule)
 
         case "Networking":
-            scrap.formula = ['$C2="SCRP"']
-            sheet.conditional_formatting.add(f"C2:C{max_row}", scrap)
+            SCRAP.formula = ['$C2="SCRP"']
+            sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
 
         case "Servers":
-            scrap.formula = ['$C2="SCRP"']
-            sheet.conditional_formatting.add(f"C2:C{max_row}", scrap)
-            for mem_type, color in memory_rules.items():
+            SCRAP.formula = ['$C2="SCRP"']
+            sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
+            for mem_type, color in RAM_RULE.items():
                 rule = Rule(
                     type='expression',
                     formula=[f'$N2="{mem_type}"'],
@@ -178,8 +173,11 @@ for sheet_name in wb.sheetnames:
                 sheet.conditional_formatting.add(f"N2:N{max_row}", rule)
 
     # TODO add manual looping to format empty cells in middle of each table
-    
+
     # add table to sheet
     sheet.add_table(table)
 
-wb.save(excel_path)
+try:    
+    wb.save(excel_path)
+except:
+    print("Error saving file")
