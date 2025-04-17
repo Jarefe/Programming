@@ -78,6 +78,12 @@ GRAY_CATEGORIES = [
     'Card Slot 3'
 ]
 
+def clean_text(text):
+    if isinstance(text, str):
+        return text.replace(" - Dash Specs", "").strip()
+    return text
+
+# returns cleaned copy of passed in workbook 
 def copy_data(old_wb):
 
     # create new workbook
@@ -100,8 +106,13 @@ def copy_data(old_wb):
 
         # copy data from old sheet to new sheet columnwise
         for col in original_sheet.iter_cols():
-            for cell in col:
-                new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
+            if col[0].value == "Description":
+                for cell in col:
+                    cleaned_value = clean_text(cell.value)
+                    new_sheet.cell(row=cell.row, column=cell.column, value=cleaned_value)
+            else:
+                for cell in col:
+                    new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
     return wb
 
 def is_sheet_empty(sheet): # TODO optimize this function
