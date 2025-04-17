@@ -6,13 +6,6 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils import get_column_letter
 import os, sys
 
-def is_sheet_empty(sheet): # TODO optimize this function
-    for row in sheet.iter_rows(min_row=2): # skip header
-        for cell in row:
-            if cell.value is not None:
-                return False # if sheet has data beyond header
-    return True # only header exists
-
 # FORMATTING RULES
 # scrap
 RED_FILL = PatternFill(bgColor='FFC7CE')
@@ -29,20 +22,22 @@ RAM_RULE = {
 ORANGE_FILL = PatternFill(
     start_color='FFA500', 
     end_color='FFA500', 
-    fill_type='solid')
+    fill_type='solid'
+    )
 
 # thin line border
 BORDER = Border(
     left=Side(style="thin"), 
     right=Side(style="thin"), 
     top=Side(style="thin"), 
-    bottom=Side(style="thin"))
+    bottom=Side(style="thin")
+    )
 
 # left alignment and vertically centered
 ALIGNMENT = Alignment(
     horizontal='left',
     vertical='center'
-)
+    )
 
 # these columns will be gray if the cells are empty
 GRAY_CATEGORIES = [
@@ -77,6 +72,42 @@ GRAY_CATEGORIES = [
     "Card Slot 2",
     "Card Slot 3"
 ]
+
+def load_workbook():
+    print()
+
+def copy_data(old_wb):
+
+    # create new workbook
+    wb = Workbook()
+
+    # remove default sheet from wb
+    wb.remove(wb.active)
+
+    # copy all non empty sheets 
+    for sheet_name in old_wb.sheetnames:
+        original_sheet = old_wb[sheet_name]
+
+        # skip empty sheets
+        if is_sheet_empty(original_sheet):
+            print(f'{sheet_name} is empty; skipping')
+            continue
+
+        # create sheet in new workbook
+        new_sheet = wb.create_sheet(title=sheet_name)
+
+        # copy data from old sheet to new sheet columnwise
+        for col in original_sheet.iter_cols():
+            for cell in col:
+                new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
+    return wb
+
+def is_sheet_empty(sheet): # TODO optimize this function
+    for row in sheet.iter_rows(min_row=2): # skip header
+        for cell in row:
+            if cell.value is not None:
+                return False # if sheet has data beyond header
+    return True # only header exists
 
 def create_table(sheet):
     # obtain farthest cell
@@ -123,32 +154,6 @@ def autofit(sheet):
 
 def format_column(sheet):
     print()
-
-def copy_data(old_wb):
-
-    # create new workbook
-    wb = Workbook()
-
-    # remove default sheet from wb
-    wb.remove(wb.active)
-
-    # copy all non empty sheets 
-    for sheet_name in old_wb.sheetnames:
-        original_sheet = old_wb[sheet_name]
-
-        # skip empty sheets
-        if is_sheet_empty(original_sheet):
-            print(f'{sheet_name} is empty; skipping')
-            continue
-
-        # create sheet in new workbook
-        new_sheet = wb.create_sheet(title=sheet_name)
-
-        # copy data from old sheet to new sheet columnwise
-        for col in original_sheet.iter_cols():
-            for cell in col:
-                new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
-    return wb
 
 # TODO handle file inputs and outputs
 script_dir = os.path.dirname(os.path.abspath(__file__))
