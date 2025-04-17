@@ -124,6 +124,31 @@ def autofit(sheet):
 def format_column(sheet):
     print()
 
+def copy_data(old_wb):
+
+    # create new workbook
+    wb = Workbook()
+
+    # remove default sheet from wb
+    wb.remove(wb.active)
+
+    # copy all non empty sheets 
+    for sheet_name in old_wb.sheetnames:
+        original_sheet = old_wb[sheet_name]
+
+        # skip empty sheets
+        if is_sheet_empty(original_sheet):
+            print(f'{sheet_name} is empty; skipping')
+            continue
+
+        # create sheet in new workbook
+        new_sheet = wb.create_sheet(title=sheet_name)
+
+        # copy data from old sheet to new sheet columnwise
+        for col in original_sheet.iter_cols():
+            for cell in col:
+                new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
+    return wb
 
 # TODO handle file inputs and outputs
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -138,30 +163,8 @@ except:
     print("Error loading file, stopping program")
     sys.exit(1)
 
-# create new workbook
-wb = Workbook()
-
-# remove default sheet from wb
-wb.remove(wb.active)
-
-# copy all non empty sheets 
-for sheet_name in original_wb.sheetnames:
-    original_sheet = original_wb[sheet_name]
-
-    # skip empty sheets
-    if is_sheet_empty(original_sheet):
-        print(f'{sheet_name} is empty; skipping')
-        continue
-
-    # create sheet in new workbook
-    new_sheet = wb.create_sheet(title=sheet_name)
-
-    # copy data from old sheet to new sheet columnwise
-    for col in original_sheet.iter_cols():
-        for cell in col:
-            new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
-
-
+# copy data to new workbook
+wb = copy_data(original_wb)
 
 # go through each sheet in the workbook
 for sheet_name in wb.sheetnames:
@@ -169,7 +172,7 @@ for sheet_name in wb.sheetnames:
     # get current sheet
     current_sheet = wb[sheet_name]
 
-    # placeholder
+    # placeholder, remove when fixing conditional formatting
     max_row = current_sheet.max_row
     max_col = current_sheet.max_column
     
