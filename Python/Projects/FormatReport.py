@@ -156,72 +156,58 @@ def autofit(sheet):
 
 def apply_conditional_formatting(sheet, sheet_name):
     max_row = sheet.max_row
-    
-    match sheet_name:
-        # new rule has to be instantiated each time to prevent overwriting formatting
-        case 'Dash Inventory':
-            SCRAP = Rule(
+
+    # create rule specific to dash inventory sheet
+    if sheet_name == 'Dash Inventory':
+        SCRAP = Rule(
+            type='expression',
+            formula=[f'$A2="SCRP"'],
+            dxf=DifferentialStyle(fill=RED_FILL)
+        )
+        sheet.conditional_formatting.add(f'A2:A{max_row}', SCRAP)
+        return
+
+    SCRAP = Rule(
+        type='expression',
+        formula=[f'$C2="SCRP"'],
+        dxf=DifferentialStyle(fill=RED_FILL)
+    )
+    sheet.conditional_formatting.add(f'C2:C{max_row}', SCRAP)
+
+    # memory formatting
+    if sheet_name in {'Desktops', 'Laptops', 'Servers'}:
+        mem_col = {
+            'Desktops': 'K',
+            'Laptops': 'K',
+            'Servers': 'N'
+        }[sheet_name]
+
+        for mem_type, color in RAM_RULE.items():
+            rule = Rule(
                 type='expression',
-                formula=['$A2="SCRP"'],
-                dxf=DifferentialStyle(fill=RED_FILL) 
+                formula=[f'${mem_col}2="{mem_type}"'],
+                dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
             )
-            sheet.conditional_formatting.add(f'A2:A{max_row}', SCRAP)
+            sheet.conditional_formatting.add(f'{mem_col}2:{mem_col}{max_row}', rule)
+        notes_col_letter = None
 
-        case 'Desktops':
-            SCRAP = Rule(
-                type='expression',
-                formula=['$C2="SCRP"'],
-                dxf=DifferentialStyle(fill=RED_FILL)
-            )
-            sheet.conditional_formatting.add(f'C2:C{max_row}', SCRAP)
-
-            for mem_type, color in RAM_RULE.items():
-                rule = Rule(
-                    type='expression',
-                    formula=[f'$K2="{mem_type}"'],
-                    dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
-                )
-                sheet.conditional_formatting.add(f'K2:K{max_row}', rule)
-
-        case 'Laptops':
-            SCRAP = Rule(
-                type='expression',
-                formula=['$C2="SCRP"'],
-                dxf=DifferentialStyle(fill=RED_FILL) 
-            )
-            sheet.conditional_formatting.add(f'C2:C{max_row}', SCRAP)
-
-            for mem_type, color in RAM_RULE.items():
-                rule = Rule(
-                    type='expression',
-                    formula=[f'$K2="{mem_type}"'],
-                    dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
-                )
-                sheet.conditional_formatting.add(f'K2:K{max_row}', rule)
-
-        case 'Networking':
-            SCRAP = Rule(
-                type='expression',
-                formula=['$C2="SCRP"'],
-                dxf=DifferentialStyle(fill=RED_FILL)
-            )
-            sheet.conditional_formatting.add(f'C2:C{max_row}', SCRAP)
-
-        case 'Servers':
-            SCRAP = Rule(
-                type='expression',
-                formula=['$C2="SCRP"'],
-                dxf=DifferentialStyle(fill=RED_FILL) 
-            )
-            sheet.conditional_formatting.add(f'C2:C{max_row}', SCRAP)
-
-            for mem_type, color in RAM_RULE.items():
-                rule = Rule(
-                    type='expression',
-                    formula=[f'$N2="{mem_type}"'],
-                    dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
-                )
-                sheet.conditional_formatting.add(f'N2:N{max_row}', rule)
+    # look for notes column 
+    for col in range(1, sheet.max_column + 1):
+        cell_value = sheet.cell(row=1, column=col).value
+        if cell_value.strip().lower() == "notes":
+            notes_col_letter = get_column_letter(col)
+            break
+        
+    # highlight non blank cells in notes column
+    if notes_col_letter:
+        notes_rule = Rule(
+            type='expression',
+            formula=[f'NOT(ISBLANK(${notes_col_letter}2))'],
+            dxf=DifferentialStyle(fill=YELLOW_FILL)
+        )
+        sheet.conditional_formatting.add(
+            f"{notes_col_letter}2:{notes_col_letter}{max_row}", notes_rule
+        )
 
 # TODO handle file inputs and outputs
 script_dir = os.path.dirname(os.path.abspath(__file__))
