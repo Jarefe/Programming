@@ -7,10 +7,12 @@ from openpyxl.utils import get_column_letter
 import os, sys
 
 # NOTE: This program does not currently handle AIOs
+# TODO: setup with API using flask
 # TODO: handle description cleaning and copying to notes
 # TODO: try to optimize functions that require looping through every value
 
 # FORMATTING RULES
+# NOTE: can change colors as necessary
 # scrap
 RED_FILL = PatternFill(bgColor='FFC7CE')
 
@@ -80,10 +82,14 @@ def copy_data(old_wb):
             if col[0].value == "Description":
                 for cell in col:
                     cleaned_value = clean_text(cell.value)
-                    new_sheet.cell(row=cell.row, column=cell.column, value=cleaned_value)
+                    new_cell = new_sheet.cell(row=cell.row, column=cell.column, value=cleaned_value)
+                    new_cell.border = BORDER
+                    new_cell.alignment = ALIGNMENT
             else:
                 for cell in col:
-                    new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
+                    new_cell = new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
+                    new_cell.border = BORDER
+                    new_cell.alignment = ALIGNMENT
     return wb
 
 def is_sheet_empty(sheet): # TODO optimize this function
@@ -113,13 +119,6 @@ def format_header(sheet):
     for col in range(1, sheet.max_column + 1):
         cell = sheet.cell(row=1, column=col)
         cell.fill = ORANGE_FILL
-
-def format_borders(sheet):
-    """Loops through each cell to apply borders"""
-    for row in sheet.iter_rows(min_row=1, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
-        for cell in row:
-            cell.border = BORDER
-            cell.alignment = ALIGNMENT
 
 def autofit(sheet):
     """Loops through each cell to get longest string and apply column spacing accordingly"""
@@ -259,19 +258,14 @@ for sheet_name in wb.sheetnames:
 
     # apply orange fill to header row
     format_header(current_sheet)
-
-    # apply borders to each cell
-    # NOTE: can comment out for efficiency
-    # has to loop through each cell to change style
-    format_borders(current_sheet)
-
-    # "autofit" columns
-    # NOTE: can comment out for efficiency
-    # has to loop through each cell to get longest string
-    autofit(current_sheet)
          
     # apply conditional formatting
     apply_conditional_formatting(current_sheet, sheet_name)
+
+    # "autofit" cells
+    # can comment out for efficiency
+    # has to loop through every single cell in each column to get longest string 
+    autofit(current_sheet)
 
 try:    
     wb.save(excel_path)
