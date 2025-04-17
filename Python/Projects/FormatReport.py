@@ -13,11 +13,14 @@ RED_FILL = PatternFill(bgColor='FFC7CE')
 # notes
 YELLOW_FILL = PatternFill(bgColor='FFFF00')
 
+# empty values
+GRAY_FILL = PatternFill(bgColor='808080')
+
 # ram
 RAM_RULE = {
-    "DDR3": "D9E1F2",  # light blue
-    "DDR4": "C6EFCE",  # light green
-    "DDR5": "06402B",  # dark green
+    'DDR3': 'D9E1F2',  # light blue
+    'DDR4': 'C6EFCE',  # light green
+    'DDR5': '06402B',  # dark green
 }
 
 # style for header
@@ -29,10 +32,10 @@ ORANGE_FILL = PatternFill(
 
 # thin line border
 BORDER = Border(
-    left=Side(style="thin"), 
-    right=Side(style="thin"), 
-    top=Side(style="thin"), 
-    bottom=Side(style="thin")
+    left=Side(style='thin'), 
+    right=Side(style='thin'), 
+    top=Side(style='thin'), 
+    bottom=Side(style='thin')
     )
 
 # left alignment and vertically centered
@@ -43,36 +46,36 @@ ALIGNMENT = Alignment(
 
 # these columns will be gray if the cells are empty
 GRAY_CATEGORIES = [
-    "Processor",
-    "Type of RAM",
-    "RAM Capacity",
-    "Battery",
-    "Touchscreen",
-    "GPU",
-    "Drive Caddy",
-    "Drive Capacity",
-    "Drive Interface",
-    "Wi-Fi",
-    "Form Factor",
-    "Rack Ears",
-    "# of PSUs",
-    "PSU Part#",
-    "# of Stack Ports",
-    "Stacking Port",
-    "Module",
-    "# of Bays",
-    "HDD Form Factor",
-    "# of Processors",
-    "Processor(s)",
-    "RAM Breakdown",
-    "RAM MFGR (Apple Only)",
-    "RAM OEM Part# (Apple Only)",
-    "Power Supply",
-    "RAID Card",
-    "Management Interface",
-    "Card Slot 1",
-    "Card Slot 2",
-    "Card Slot 3"
+    'Processor',
+    'Type of RAM',
+    'RAM Capacity',
+    'Battery',
+    'Touchscreen',
+    'GPU',
+    'Drive Caddy',
+    'Drive Capacity',
+    'Drive Interface',
+    'Wi-Fi',
+    'Form Factor',
+    'Rack Ears',
+    '# of PSUs',
+    'PSU Part#',
+    '# of Stack Ports',
+    'Stacking Port',
+    'Module',
+    '# of Bays',
+    'HDD Form Factor',
+    '# of Processors',
+    'Processor(s)',
+    'RAM Breakdown',
+    'RAM MFGR (Apple Only)',
+    'RAM OEM Part# (Apple Only)',
+    'Power Supply',
+    'RAID Card',
+    'Management Interface',
+    'Card Slot 1',
+    'Card Slot 2',
+    'Card Slot 3'
 ]
 
 def copy_data(old_wb):
@@ -117,7 +120,7 @@ def create_table(sheet):
     table_range = f'A1:{get_column_letter(max_column)}{max_row}'
     
     # create table with data range
-    table = Table(displayName=f"Table_{sheet_name.replace(' ','')}", ref=table_range)
+    table = Table(displayName=f'Table_{sheet_name.replace(' ','')}', ref=table_range)
     sheet.add_table(table)
 
 def format_header(sheet):
@@ -155,21 +158,22 @@ def apply_conditional_formatting(sheet, sheet_name):
     max_row = sheet.max_row
     
     match sheet_name:
+        # new rule has to be instantiated each time to prevent overwriting formatting
         case 'Dash Inventory':
             SCRAP = Rule(
                 type='expression',
                 formula=['$A2="SCRP"'],
                 dxf=DifferentialStyle(fill=RED_FILL) 
             )
-            sheet.conditional_formatting.add(f"A2:A{max_row}", SCRAP)
+            sheet.conditional_formatting.add(f'A2:A{max_row}', SCRAP)
 
-        case "Desktops":
+        case 'Desktops':
             SCRAP = Rule(
                 type='expression',
                 formula=['$C2="SCRP"'],
                 dxf=DifferentialStyle(fill=RED_FILL)
             )
-            sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
+            sheet.conditional_formatting.add(f'C2:C{max_row}', SCRAP)
 
             for mem_type, color in RAM_RULE.items():
                 rule = Rule(
@@ -177,15 +181,15 @@ def apply_conditional_formatting(sheet, sheet_name):
                     formula=[f'$K2="{mem_type}"'],
                     dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
                 )
-                sheet.conditional_formatting.add(f"K2:K{max_row}", rule)
+                sheet.conditional_formatting.add(f'K2:K{max_row}', rule)
 
-        case "Laptops":
+        case 'Laptops':
             SCRAP = Rule(
                 type='expression',
                 formula=['$C2="SCRP"'],
                 dxf=DifferentialStyle(fill=RED_FILL) 
             )
-            sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
+            sheet.conditional_formatting.add(f'C2:C{max_row}', SCRAP)
 
             for mem_type, color in RAM_RULE.items():
                 rule = Rule(
@@ -193,23 +197,23 @@ def apply_conditional_formatting(sheet, sheet_name):
                     formula=[f'$K2="{mem_type}"'],
                     dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
                 )
-                sheet.conditional_formatting.add(f"K2:K{max_row}", rule)
+                sheet.conditional_formatting.add(f'K2:K{max_row}', rule)
 
-        case "Networking":
+        case 'Networking':
             SCRAP = Rule(
                 type='expression',
                 formula=['$C2="SCRP"'],
                 dxf=DifferentialStyle(fill=RED_FILL)
             )
-            sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
+            sheet.conditional_formatting.add(f'C2:C{max_row}', SCRAP)
 
-        case "Servers":
+        case 'Servers':
             SCRAP = Rule(
                 type='expression',
                 formula=['$C2="SCRP"'],
                 dxf=DifferentialStyle(fill=RED_FILL) 
             )
-            sheet.conditional_formatting.add(f"C2:C{max_row}", SCRAP)
+            sheet.conditional_formatting.add(f'C2:C{max_row}', SCRAP)
 
             for mem_type, color in RAM_RULE.items():
                 rule = Rule(
@@ -217,12 +221,11 @@ def apply_conditional_formatting(sheet, sheet_name):
                     formula=[f'$N2="{mem_type}"'],
                     dxf=DifferentialStyle(fill=PatternFill(bgColor=color))
                 )
-                sheet.conditional_formatting.add(f"N2:N{max_row}", rule)
-
+                sheet.conditional_formatting.add(f'N2:N{max_row}', rule)
 
 # TODO handle file inputs and outputs
 script_dir = os.path.dirname(os.path.abspath(__file__))
-excel_path = os.path.join(script_dir, "Test Output.xlsx")
+excel_path = os.path.join(script_dir, 'Test Output.xlsx')
 
 # load existing workbook
 # TODO change to be dynamic
@@ -230,7 +233,7 @@ try:
     original_path = 'C:/Users/test/Downloads/Report 1.xlsx' 
     original_wb = load_workbook(original_path)
 except Exception as e:
-    print(f"{e}")
+    print(f'{e}')
     sys.exit(1)
 
 # copy data to new workbook
@@ -241,10 +244,6 @@ for sheet_name in wb.sheetnames:
     
     # get current sheet
     current_sheet = wb[sheet_name]
-
-    # placeholder, remove when fixing conditional formatting
-    max_row = current_sheet.max_row
-    max_col = current_sheet.max_column
     
     # create table 
     create_table(current_sheet)
@@ -261,9 +260,7 @@ for sheet_name in wb.sheetnames:
     # apply conditional formatting
     apply_conditional_formatting(current_sheet, sheet_name)
 
-    # TODO add manual looping to format empty cells in middle of each table
-
 try:    
     wb.save(excel_path)
-except:
-    print("Error saving file")
+except Exception as e:
+    print(f'Error saving file: {e}')
